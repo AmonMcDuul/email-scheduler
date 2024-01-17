@@ -50,17 +50,14 @@ pub fn send_email(to: &str, subject: &str, body: &str) -> Result<(), Box<dyn std
         .subject(subject)
         .body(body.to_owned())?;
 
-    // Create SMTP transport
     let creds = Credentials::new(username.to_string(), password.to_string());
     let mailer = SmtpTransport::starttls_relay("smtp.gmail.com")?
         .credentials(creds)
         .build();
 
-    // Send the email
     match mailer.send(&email) {
         Ok(_) => println!("Email sent successfully"),
         Err(e) => println!("Failed to send email: {:?}", e),
     }
-
     Ok(())
 }
