@@ -35,11 +35,9 @@ pub fn send_scheduled_emails(database: &Database, messages: Vec<Message>) {
 }
 
 pub fn send_email(to: &str, subject: &str, body: &str) -> Result<(), Box<dyn std::error::Error>> {
-    // Read the configuration file
     let config_str = fs::read_to_string("config.toml").expect("Error reading config file");
     let config: config::AppConfig = toml::from_str(&config_str).expect("Error parsing config file");
 
-    // Use the configuration
     let username = &config.credentials.username;
     let password = &config.credentials.password;
 
