@@ -6,6 +6,17 @@ use actix_web::{
     HttpResponse,
 };
 
+#[utoipa::path(
+    get,
+    path = "/messages",
+    responses(
+        (status = 200, description = "messages found successfully", body = Message),
+        (status = NOT_FOUND, description = "No messages found")
+    ),
+    // params(
+    //     ("id" = u64, Path, description = "id to get message for"),
+    // )
+)]
 #[get("/messages")]
 pub async fn get_messages(db: web::Data<Database>) -> HttpResponse {
     let messages = db.get_messages();

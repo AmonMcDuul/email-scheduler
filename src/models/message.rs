@@ -1,7 +1,8 @@
 use chrono::prelude::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
+use utoipa::ToSchema;
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone, ToSchema)]
 pub struct Message {
     pub id: Option<String>,
     pub email: String,

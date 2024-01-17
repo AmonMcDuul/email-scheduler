@@ -2,12 +2,15 @@ use actix_web::{get, web, App, HttpResponse, HttpServer, Responder, Result};
 use serde::Serialize;
 use std::time::Duration;
 use tokio::time::interval;
+use utoipa::OpenApi;
+use utoipa_swagger_ui::SwaggerUi;
 
 mod api;
 mod models;
 mod repository;
 mod services;
 
+use crate::models::message::Message;
 use crate::services::email_service::send_scheduled_emails;
 
 #[derive(Serialize)]
@@ -46,11 +49,19 @@ async fn main() -> std::io::Result<()> {
 
     tokio::spawn(send_scheduled_emails_periodically(app_data.clone()));
 
+    #[derive(OpenApi)]
+    #[openapi(paths(api::api::get_messages), components(schemas(Message)))]
+    struct ApiDoc;
+
     HttpServer::new(move || {
         App::new()
             .app_data(app_data.clone())
             .configure(api::api::config)
             .service(healthcheck)
+            .service(
+                SwaggerUi::new("/swagger-ui/{_:.*}")
+                    .url("/api-docs/openapi.json", ApiDoc::openapi().clone()),
+            )
             .default_service(web::route().to(not_found))
             .wrap(actix_web::middleware::Logger::default())
     })
