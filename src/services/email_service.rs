@@ -1,24 +1,68 @@
 use chrono::Utc;
+use lettre::message::Mailbox;
+use lettre::transport::smtp::authentication::Credentials;
+use lettre::{Message as LettreMessage, SmtpTransport, Transport};
+use std::fs;
 
-use crate::{models::message::Message, repository::database::Database};
+use crate::{models::config, models::message::Message, repository::database::Database};
 
 pub fn send_scheduled_emails(database: &Database, messages: Vec<Message>) {
     for message in messages {
         if let Some(send_at) = message.send_at {
             let current_time = Utc::now();
             if send_at <= current_time && message.send != Some(true) {
-                // todo implement email logic
                 println!(
                     "Sending email to {} with message: {}",
                     message.email,
                     message.message_body.as_ref().map_or("", String::as_str)
                 );
-                if let Some(ref id) = message.id {
-                    database.update_message_as_sent(id, message.clone());
+                let subject = "E-mail scheduler";
+
+                if let Err(err) = send_email(
+                    &message.email,
+                    subject,
+                    message.message_body.as_ref().map_or("", String::as_str),
+                ) {
+                    println!("Failed to send email: {:?}", err);
+                } else {
+                    database.update_message_as_sent(message.clone());
                 }
             } else {
-                println!("i didn't send no mail yo!")
+                println!("I didn't send no mail yo!")
             }
         }
     }
+}
+
+pub fn send_email(to: &str, subject: &str, body: &str) -> Result<(), Box<dyn std::error::Error>> {
+    // Read the configuration file
+    let config_str = fs::read_to_string("config.toml").expect("Error reading config file");
+    let config: config::AppConfig = toml::from_str(&config_str).expect("Error parsing config file");
+
+    // Use the configuration
+    let username = &config.credentials.username;
+    let password = &config.credentials.password;
+
+    let from_address: Mailbox = username.parse()?;
+    let to_address: Mailbox = to.parse()?;
+
+    let email = LettreMessage::builder()
+        .from(from_address)
+        .to(to_address)
+        .subject(subject)
+        .body(body.to_owned())?;
+
+    // Create SMTP transport
+    let creds = Credentials::new(username.to_string(), password.to_string());
+    let mailer = SmtpTransport::starttls_relay("smtp.gmail.com")?
+        .credentials(creds)
+        .build();
+
+    // Send the email
+    match mailer.send(&email) {
+        Ok(_) => println!("Email sent successfully"),
+        Err(e) => println!("Failed to send email: {:?}", e),
+    }
+
+    Ok(())
 }

@@ -63,16 +63,16 @@ impl Database {
         Some(messages.remove(index))
     }
 
-    pub fn update_message_as_sent(&self, id: &str, message: Message) -> Option<Message> {
+    pub fn update_message_as_sent(&self, message: Message) -> Option<Message> {
         let mut messages = self.messages.lock().unwrap();
         let message = Message {
-            id: Some(id.to_string()),
+            id: Some(message.id?),
             send: Some(true),
             ..message
         };
         let index = messages
             .iter()
-            .position(|message: &Message| message.id == Some(id.to_string()))?;
+            .position(|msg: &Message| msg.id == message.id)?;
         messages[index] = message.clone();
         Some(message)
     }
