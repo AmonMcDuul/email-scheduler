@@ -19,7 +19,7 @@ impl Database {
         messages.clone()
     }
 
-    pub fn get_message_by_id(&self, id: &str) -> Option<Message> {
+    pub fn get_message(&self, id: &str) -> Option<Message> {
         let messages = self.messages.lock().unwrap();
         messages
             .iter()
@@ -42,7 +42,7 @@ impl Database {
         Ok(message)
     }
 
-    pub fn update_message_by_id(&self, id: &str, message: Message) -> Option<Message> {
+    pub fn update_message(&self, id: &str, message: Message) -> Option<Message> {
         let mut messages = self.messages.lock().unwrap();
         let message = Message {
             id: Some(id.to_string()),
@@ -55,7 +55,7 @@ impl Database {
         Some(message)
     }
 
-    pub fn delete_message_by_id(&self, id: &str) -> Option<Message> {
+    pub fn delete_message(&self, id: &str) -> Option<Message> {
         let mut messages = self.messages.lock().unwrap();
         let index = messages
             .iter()

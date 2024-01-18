@@ -14,5 +14,5 @@ serde = { version = "1.0.195", features = ["derive"] }
 tokio = "1.35.1"
 uuid = { version = "1.6.1", features = ["v4"] }
 toml = "0.5"
-utoipa = { version = "4", features = ["actix_extras"] }
+utoipa = { version = "4", features = ["actix_extras", "chrono"] }
 utoipa-swagger-ui = { version = "4", features = ["actix-web"] }

@@ -50,7 +50,16 @@ async fn main() -> std::io::Result<()> {
     tokio::spawn(send_scheduled_emails_periodically(app_data.clone()));
 
     #[derive(OpenApi)]
-    #[openapi(paths(api::api::get_messages), components(schemas(Message)))]
+    #[openapi(
+        paths(
+            api::api::get_messages,
+            api::api::get_message,
+            api::api::create_message,
+            api::api::update_message,
+            api::api::delete_message,
+        ),
+        components(schemas(Message))
+    )]
     struct ApiDoc;
 
     HttpServer::new(move || {
